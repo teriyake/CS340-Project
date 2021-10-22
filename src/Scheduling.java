@@ -42,28 +42,39 @@ public class Scheduling {
     }
 
     public static void main(String[] args) {
+ 
+        long startT = System.currentTimeMillis();
 
         String constraints = "./tests/constraints";
         String studentPrefs = "./tests/studentprefs";
+        String outputFile = "./tests/schedule";
+
+        if (args.length != 0) {
+            constraints = "./data/c_" + args[0];
+            studentPrefs = "./data/s_" + args[0];
+            outputFile = "./output/schedule_" + args[0];
+        } 
 
         Constraints cons = IO.constraints(constraints);
         int timeSlots = cons.getTimeSlots();
         Course[] courses = cons.getCourses();
         Room[] rooms = cons.getRooms();
         //Professor[] profs = cons.getProfs();
+
         Professor[] profAvailability = Arrays.copyOfRange(cons.getPCPairs(), 1, courses.length);
         Conflict[] conflicts = new Conflict[courses.length];
+
         int spv = IO.populateCourses(studentPrefs, courses, conflicts) * 4;
         double spvu = spv;
+
         int[] studentConflicts = new int[cons.getCourses()[1].getRoster().length];
-        HashMap<Integer,Conflict> STPairs = new HashMap<Integer,Conflict>();
+        //HashMap<Integer,Conflict> STPairs = new HashMap<Integer,Conflict>();
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseEnrollmentComparator()));
         Arrays.sort(rooms, Comparator.nullsLast(new RoomComparator()));
 
         int timeAvailability = timeSlots;
         int currentRoom = 0;
-
         for (int i = 0; i < courses.length; i++) {
             if (courses[i] != null) {
                 if (timeAvailability > 0) {
@@ -111,6 +122,7 @@ public class Scheduling {
         Arrays.sort(courses, Comparator.nullsLast(new CourseTimeComparator()));
         
         //checkStudentTimeConflicts(courses, conflicts, STPairs);
+
         Set<Integer> numSet = new HashSet<Integer>();
         int currentTime = 1;
         for (int i = 1; i < courses.length - 1; i++) {
@@ -143,8 +155,11 @@ public class Scheduling {
         }
         */
 
-        IO.generateSchedule(courses);
+        IO.generateSchedule(courses, outputFile);
         System.out.println(String.format("Student Preference Value: %d (%.2f)\n", spv, (spv / spvu)));
+
+        long endT = System.currentTimeMillis();
+        System.out.println(endT - startT);
 
     }
 }

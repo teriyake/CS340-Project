@@ -87,13 +87,20 @@ public class IO {
         return cons;
     }
 
-    public static void generateSchedule(Course[] courses) {
-        try (Writer bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("schedule"), StandardCharsets.UTF_8))) {
+    public static void generateSchedule(Course[] courses, String f) {
+        try (Writer bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8))) {
             bw.write("Course\tRoom\tTeacher\tTime\tStudents\n");
             for (Course c : courses) {
                 if (c != null) {
-                    bw.write(String.format("%d\t%d\t%d\t%d\t%s\n", 
-                    c.getID(), c.getRoom().getNumber(), c.getProf(), c.getTime(), c.getRosterStr()));
+                    int r = 1;
+                    if (c.getRoom() == null) {
+                        r = 0;
+                        bw.write(String.format("%d\t%d\t%d\t%d\t%s\n", 
+                        c.getID(), r, c.getProf(), c.getTime(), c.getRosterStr()));
+                    } else {
+                        bw.write(String.format("%d\t%d\t%d\t%d\t%s\n", 
+                        c.getID(), c.getRoom().getNumber(), c.getProf(), c.getTime(), c.getRosterStr()));
+                    }
                 }
             }
         }  catch (IOException e) {
