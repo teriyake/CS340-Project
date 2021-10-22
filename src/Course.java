@@ -39,8 +39,24 @@ public class Course {
     public int getEnrollment() {
         return this.enrollment;
     } 
+    public int[] removeZ() {
+        int[] ret = new int[this.enrollment];
+        for (int i = 0; i < this.roster.length; i++) {
+            if (this.roster[i + 1] != 0) {
+                ret[i] = this.roster[i + 1];
+            }
+            if (ret[ret.length - 1] != 0) {
+                return ret;
+            }
+        }
+        return ret;
+    }
+
     public int[] getRoster() {
-        return this.roster;
+        if (this.roster.length == this.enrollment) {
+            return this.roster;
+        }
+        return removeZ();
     }
 
     public String getRosterStr() {
@@ -100,6 +116,23 @@ public class Course {
         }
     }
 
+    public void unenroll(int n) {
+        for (int s : this.getRoster()) {
+            if (s == n) {
+                s = 0;
+                this.enrollment--;
+            }
+        }
+    }
+
+    public void cancel() {
+        this.enrollment = 0;
+        this.prof = 0;
+        this.room = new Room(0);
+        this.time = 0;
+        this.roster = new int[0];
+    }
+
     /*
     public Student getStudentByID(int n) {
     }
@@ -118,8 +151,8 @@ public class Course {
     }
 
     public String toString() {
-        return String.format("Course ID: %d\nTime: %d\nRoom: %s\nProfessor: %d\nCurrent Enrollment: %d\n", 
-                              this.ID, this.time, this.room, this.prof, this.enrollment);
+        return String.format("Course ID: %d\nTime: %d\nRoom: %s\nProfessor: %d\nCurrent Enrollment: %d\nStudents: %s\n", 
+                              this.ID, this.time, this.room, this.prof, this.enrollment, this.getRosterStr());
     }
 
 }

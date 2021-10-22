@@ -3,6 +3,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Scheduling {
@@ -23,12 +24,10 @@ public class Scheduling {
         Professor p = pf[c[i].getID() - 1];
         if ((p.getCourses()[0].getEnrollment()) < (p.getCourses()[1].getEnrollment())) {
             n = n - p.getCourses()[0].getEnrollment();
-            p.getCourses()[0].assignProf(0);
-            p.editCourse(0, null);
+            p.getCourses()[0].cancel();
         } else {
             n = n - p.getCourses()[1].getEnrollment();
-            p.getCourses()[1].assignProf(0);
-            p.editCourse(1, null);
+            p.getCourses()[0].cancel();
         }
         return n;
     }
@@ -41,69 +40,6 @@ public class Scheduling {
         }
         return n;
     }
-
-    public static void checkStudentTimeConflicts(Course[] cc, Conflict[] cf, HashMap<Integer,Conflict> map) {
-        int i = 1;
-        String ret = "";
-        Course ccc = cc[cc.length - 2];
-        for (Course c : cc) {
-            if (c != null) {
-                if (c.getTime() == i) {
-                    ret = ret + c.getRosterStr();
-                } else {
-                    i++;
-
-                    
-                    int[] e = Stream.of(ret.split("\\s+")).mapToInt(Integer::parseInt).toArray(); 
-                    System.out.println(Arrays.toString(e));
-                    HashSet<Integer> conflicts = new HashSet<Integer>();
-                    for (Integer n : e) {
-                        if (!conflicts.add(n)) {
-                            System.out.println("Conflict Student: " + n);
-                    
-                                if (map.containsKey(n)) {
-                                    map.get(n).addConf(n);
-                                } else {
-                                    Conflict newCf = new Conflict(c);
-                                    newCf.addConf(n);
-                                    map.put(n, newCf);
-                                }
-                        
-                        }
-                    }
-                    
-                    System.out.println(ret);
-                    
-                    ret = c.getRosterStr();
-                }
-            }
-        }
-        int[] e = Stream.of(ret.split("\\s+")).mapToInt(Integer::parseInt).toArray(); 
-        System.out.println(Arrays.toString(e));
-        HashSet<Integer> conflicts = new HashSet<Integer>();
-        for (Integer n : e) {
-            if (!conflicts.add(n)) {
-                System.out.println("Conflict Student: " + n);
-        
-                    if (map.containsKey(n)) {
-                        map.get(n).addConf(n);
-                    } else {
-                        Conflict newCf = new Conflict(ccc);
-                        newCf.addConf(n);
-                        map.put(n, newCf);
-                    }
-            
-            }
-        }
-    
-    }
-
-    public static void resolveStudentConflicts() {
-        //calculate total number of conflicts for course c
-        //reschedule c if conflict > popularity
-        //else unenroll students
-    }
-
 
     public static void main(String[] args) {
 
@@ -171,15 +107,41 @@ public class Scheduling {
             }
         }
 
-        for (int k : studentConflicts) {
-            System.out.println(k);
-        }
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseTimeComparator()));
         
-        checkStudentTimeConflicts(courses, conflicts, STPairs);
+        //checkStudentTimeConflicts(courses, conflicts, STPairs);
+        Set<Integer> numSet = new HashSet<Integer>();
+        int currentTime = 1;
+        for (int i = 1; i < courses.length - 1; i++) {
+            System.out.println(Arrays.toString(courses[i].getRoster()));
+            if (courses[i].getTime() == currentTime) {
+                for(int s : courses[i].getRoster()){
+                    // If add returns false
+                    if(!numSet.add(s)){
+                        //System.out.println(String.format("Conflicts Found\nStudent: %d\tCourse: %d\n", s, courses[i].getID()));
+                        //store conflict info
+                        courses[i].unenroll(s);
+                        spv--;
+                    }
+                }
+            } else {
+                currentTime = courses[i].getTime();
+                numSet = new HashSet<Integer>();
+                for (int s : courses[i].getRoster()) {
+                    numSet.add(s);
+                }
+            }
+            
+        }
 
-        System.out.println(STPairs);
+        /*
+        for (Course c : courses) {
+            if (c != null) {
+                System.out.println(c.toString());
+            }
+        }
+        */
 
         IO.generateSchedule(courses);
         System.out.println(String.format("Student Preference Value: %d (%.2f)\n", spv, (spv / spvu)));
