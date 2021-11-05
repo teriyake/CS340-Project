@@ -10,6 +10,9 @@ public class Scheduling {
 
     public static boolean checkProfConflicts(int i, Professor[] pf, Course[] c) {
         Professor p = pf[c[i].getID() - 1];
+        if (p == null) {
+            return false;
+        }
         c[i].assignProf(p.getName());
         p.addCourse(c[i]);
         if ((p.getCourses()[0] != null) && (p.getCourses()[1] != null)) {
@@ -92,10 +95,6 @@ public class Scheduling {
 
                     
                 } else if (currentRoom >= (rooms.length - 1)) {
-                    //should not happen unless some timeslot @ some room is unused
-                    //or when a course is cancelled
-                    //System.out.println("No more room... ");
-                    //TODO
                     break;
                 } else {
 
