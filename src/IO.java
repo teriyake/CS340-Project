@@ -20,7 +20,7 @@ public class IO {
             while ((l = br.readLine()) != null) {
                 String[] ls = l.split("\\s+");
 
-                for (int i = 1; i < 5; i++) {
+                for (int i = 1; i < ls.length; i++) {
                     if (courses[Integer.parseInt(ls[i])] != null) {
                         //System.out.println(courses[i]);
                         courses[Integer.parseInt(ls[i])].enroll(Integer.parseInt(ls[0]));
