@@ -40,6 +40,7 @@ public class Scheduling {
             int overflow = c[i].getEnrollment() - c[i].getRoom().getCapacity();
             n = n - overflow;
             c[i].drop(overflow);
+            //todo for each student over the capacity limit, remove c[i] from their schedule
         }
         return n;
     }
@@ -63,15 +64,14 @@ public class Scheduling {
         Course[] courses = cons.getCourses();
         Room[] rooms = cons.getRooms();
         //Professor[] profs = cons.getProfs();
+        Student[] students = new Student[IO.getStudents(studentPrefs) + 1];
 
         Professor[] profAvailability = Arrays.copyOfRange(cons.getPCPairs(), 1, courses.length);
         Conflict[] conflicts = new Conflict[courses.length];
 
-        int spv = IO.populateCourses(studentPrefs, courses, conflicts) * 4;
+        int spv = IO.populateCourses(studentPrefs, courses, conflicts, students) * 4;
         double spvu = spv;
 
-        int[] studentConflicts = new int[cons.getCourses()[1].getRoster().length];
-        //HashMap<Integer,Conflict> STPairs = new HashMap<Integer,Conflict>();
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseEnrollmentComparator()));
         Arrays.sort(rooms, Comparator.nullsLast(new RoomComparator()));
@@ -120,19 +120,15 @@ public class Scheduling {
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseTimeComparator()));
         
-        //checkStudentTimeConflicts(courses, conflicts, STPairs);
-
         Set<Integer> numSet = new HashSet<Integer>();
         int currentTime = 1;
         for (int i = 1; i < courses.length - 1; i++) {
             System.out.println(Arrays.toString(courses[i].getRoster()));
             if (courses[i].getTime() == currentTime) {
                 for(int s : courses[i].getRoster()){
-                    // If add returns false
                     if(!numSet.add(s)){
-                        //System.out.println(String.format("Conflicts Found\nStudent: %d\tCourse: %d\n", s, courses[i].getID()));
-                        //store conflict info
                         courses[i].unenroll(s);
+                        students[s].removeCourseO(courses[i]);
                         spv--;
                     }
                 }
@@ -146,13 +142,16 @@ public class Scheduling {
             
         }
 
-        /*
-        for (Course c : courses) {
+        //* testing
+        System.out.println(Arrays.toString(students));
+        for (Course c : students[7].getCoursesO()) {
             if (c != null) {
                 System.out.println(c.toString());
             }
+            if (c == null) {
+                System.out.println(c);
+            }
         }
-        */
 
         IO.generateSchedule(courses, outputFile);
         System.out.println(String.format("Student Preference Value: %d (%.2f)\n", spv, (spv / spvu)));
