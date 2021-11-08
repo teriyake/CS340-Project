@@ -4,16 +4,18 @@ public class Student {
     
     private int name;
     private int[] courses;
+    private Course[] coursesO;
     private int[] times;
 
-    public Student(int n, int[] c, int[] t) {
+    public Student(int n, int[] c, int[] t, Course[] cO) {
         this.name = n;
         this.courses = c;
         this.times = t;
+        this.coursesO = cO;
     }
 
     public Student(int n) {
-        this(n, new int[4], new int[2]);
+        this(n, new int[4], new int[2], new Course[4]);
     }
 
     public int getName() {
@@ -24,10 +26,24 @@ public class Student {
         return this.courses;
     }
 
+    public Course[] getCoursesO() {
+        return this.coursesO;
+    }
+
     public boolean addCourse(int c) {
         for (int i = 0; i < 4; i++) {
             if (this.courses[i] == 0) {
                 this.courses[i] = c;
+                return true;
+            }
+        }
+        return false; 
+    }
+
+    public boolean addCourseO(Course c) {
+        for (int i = 0; i < coursesO.length; i++) {
+            if (this.coursesO[i] == null) {
+                this.coursesO[i] = c;
                 return true;
             }
         }
@@ -67,6 +83,16 @@ public class Student {
         return false;
     }
 
+    public boolean removeCourseO(Course c) {
+        for (int i = 0; i < 4; i++) {
+            if (this.coursesO[i] == c) {
+                this.coursesO[i] = null;
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean removeTime(int t) {
         for (int i = 0; i < 2; i++) {
             if (this.times[i] == t) {
@@ -87,8 +113,13 @@ public class Student {
         return false;
     }
 
+    public boolean editCourseO(int c1, int c2) {
+        //todo
+        return false;
+    }
+
     public String toString() {
-        return this.getName() + "\t" + Arrays.toString(this.courses);
+        return this.getName() + "\n" + Arrays.toString(this.coursesO);
     }
 }
 
