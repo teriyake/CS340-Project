@@ -85,6 +85,13 @@ public class Scheduling {
         int currentRoom = 0;
         for (int i = 0; i < courses.length; i++) {
             if (courses[i] != null) {
+
+                //emily balch sems are always scheduled in time 2
+                if (courses[i] != null && ((courses[i].getID() == 001) || (courses[i].getID() == 002))) {
+                    courses[i].assignRoom(rooms[currentRoom]);
+                    timeAvailability--;
+                    courses[i].assignTime(2);
+                } 
                 if (timeAvailability > 0) {
 
                     courses[i].assignRoom(rooms[currentRoom]);
