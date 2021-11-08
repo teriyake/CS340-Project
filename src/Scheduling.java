@@ -35,12 +35,17 @@ public class Scheduling {
         return n;
     }
 
-    public static int resolveCapConflicts(int i, Course[] c, int n) {
+    public static int resolveCapConflicts(int i, Course[] c, Student[] students, int n) {
         if (c[i].getRoom().getCapacity() < c[i].getEnrollment()) {
             int overflow = c[i].getEnrollment() - c[i].getRoom().getCapacity();
             n = n - overflow;
             c[i].drop(overflow);
-            //todo for each student over the capacity limit, remove c[i] from their schedule
+            // for each student over the capacity limit, remove c[i] from their schedule
+            int[] currentEnrollment = c[i].getRoster();
+            for (int j = 0; j > n; j++) {
+                int s = currentEnrollment[currentEnrollment.length - i - 1];
+                students[s].removeCourseO(c[i]);
+            }
         }
         return n;
     }
@@ -91,7 +96,7 @@ public class Scheduling {
                         spv = resolveProfConflicts(i, profAvailability, courses, spv);
                     }
 
-                    spv = resolveCapConflicts(i, courses, spv);
+                    spv = resolveCapConflicts(i, courses, students, spv);
 
                     
                 } else if (currentRoom >= (rooms.length - 1)) {
@@ -108,7 +113,7 @@ public class Scheduling {
                         spv = resolveProfConflicts(i, profAvailability, courses, spv);
                     }
 
-                    spv = resolveCapConflicts(i, courses, spv);
+                    spv = resolveCapConflicts(i, courses, students, spv);
 
 
                     
