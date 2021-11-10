@@ -65,7 +65,8 @@ public class Scheduling {
         } 
 
         Constraints cons = IO.constraints(constraints);
-        int timeSlots = cons.getTimeSlots();
+        //int timeSlots = cons.getTimeSlots();
+        int timeSlots = 17;
         Course[] courses = cons.getCourses();
         Room[] rooms = cons.getRooms();
         //Professor[] profs = cons.getProfs();
