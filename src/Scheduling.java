@@ -24,17 +24,22 @@ public class Scheduling {
         return false;
     }
 
-    public static int resolveProfConflicts(int i, Professor[] pf, Course[] c, int n) {
+    public static int resolveProfConflicts(int i, Professor[] pf, Course[] c, int n, int tt, int nt) {
         Professor p = pf[i];
         if ((p == null)) {
             return 0;
         }
-        if ((c[p.getC1()].getEnrollment()) < (c[p.getC2()].getEnrollment())) {
-            n = n - c[p.getC1()].getEnrollment();
-            c[p.getC1()].cancel();
-        } else {
-            n = n - c[p.getC2()].getEnrollment();
-            c[p.getC2()].cancel();
+        if (nt <= 4) {
+            c[p.getC1()].assignTime(nt + tt);
+            return n;
+        } else { // cancel class if cannot schedule in the extra time slot
+            if ((c[p.getC1()].getEnrollment()) < (c[p.getC2()].getEnrollment())) {
+                n = n - c[p.getC1()].getEnrollment();
+                c[p.getC1()].cancel();
+            } else {
+                n = n - c[p.getC2()].getEnrollment();
+                c[p.getC2()].cancel();
+            }
         }
         return n;
     }
@@ -52,10 +57,6 @@ public class Scheduling {
             }
         }
         return n;
-    }
-
-    public static void scheduleNightClasses(int t) {
-
     }
 
     public static void main(String[] args) {
@@ -158,7 +159,11 @@ public class Scheduling {
 
 
                         if (checkProfConflicts(i, profAvailability, courses)) {
-                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                            int nspv = resolveProfConflicts(i, profAvailability, courses, spv, timeSlots, currentTimeSlotN);
+                            if (nspv == spv) {
+                                currentTimeSlotN--;
+                            }
+                            spv = nspv;
                         }
 
                         spv = resolveCapConflicts(i, courses, students, spv);
@@ -174,8 +179,11 @@ public class Scheduling {
                         courses[i].assignTime(timeSlots - timeAvailability);
 
                         if (checkProfConflicts(i, profAvailability, courses)) {
-                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
-                        }
+                            int nspv = resolveProfConflicts(i, profAvailability, courses, spv, timeSlots, currentTimeSlotN);
+                            if (nspv == spv) {
+                                currentTimeSlotN--;
+                            }
+                            spv = nspv;                        }
 
                         spv = resolveCapConflicts(i, courses, students, spv);
 
@@ -188,8 +196,11 @@ public class Scheduling {
 
 
                         if (checkProfConflicts(i, profAvailability, courses)) {
-                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
-                        }
+                            int nspv = resolveProfConflicts(i, profAvailability, courses, spv, timeSlots, currentTimeSlotN);
+                            if (nspv == spv) {
+                                currentTimeSlotN--;
+                            }
+                            spv = nspv;                        }
 
                         spv = resolveCapConflicts(i, courses, students, spv);
                         
@@ -204,8 +215,11 @@ public class Scheduling {
                         courses[i].assignTime(timeSlots - timeAvailability);
 
                         if (checkProfConflicts(i, profAvailability, courses)) {
-                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
-                        }
+                            int nspv = resolveProfConflicts(i, profAvailability, courses, spv, timeSlots, currentTimeSlotN);
+                            if (nspv == spv) {
+                                currentTimeSlotN--;
+                            }
+                            spv = nspv;                        }
 
                         spv = resolveCapConflicts(i, courses, students, spv);
 
