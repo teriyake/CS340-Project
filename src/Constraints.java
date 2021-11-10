@@ -2,6 +2,7 @@ public class Constraints {
     
     private int timeSlots;
     private Course[] courses;
+    private int[] labs;
     private Room[] rooms;
     private Professor[] profs;
     private Professor[] pcPairs;
@@ -11,6 +12,7 @@ public class Constraints {
         this.courses = new Course[c + 1];
         this.rooms = new Room[r + 1];
         this.profs = new Professor[p + 1];
+        this.labs = new int[c + 1];
     }   
 
     public Constraints(int t) {
@@ -28,6 +30,10 @@ public class Constraints {
 
     public void addCourses(int n) {
         this.courses = new Course[n + 1];
+    }
+
+    public void addLabs(int n) {
+        this.labs = new int[n + 1];
     }
 
     public int getTimeSlots() {
@@ -50,8 +56,17 @@ public class Constraints {
         return this.pcPairs;
     }
 
+    public int[] getLabs() {
+        return this.labs;
+    }
+
     public void addRoom(int r, int c) {
         Room newRoom = new Room(r, c);
+        this.rooms[r] = newRoom;
+    }
+
+    public void addRoomP(int r, int c, boolean p) {
+        Room newRoom = new Room(r, c,p);
         this.rooms[r] = newRoom;
     }
 
@@ -65,6 +80,10 @@ public class Constraints {
         // this.pcPairs[profs[p].getC2()] = null;
         this.profs[p].editC2(c);
         this.pcPairs[c] = profs[p];
+    }
+
+    public void addLab(int c) {
+        this.labs[c] = 1;
     }
 
     public int getTotalTimes() {

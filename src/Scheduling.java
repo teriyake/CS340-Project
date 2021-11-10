@@ -3,26 +3,32 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Scheduling {
 
-    public static boolean checkProfConflicts(int i, Professor[] pf, Course[] c) {
+    public static Return checkProfConflicts(int i, Professor[] pf, Course[] c) {
+        Return ret = new Return(0, false);
         Professor p = pf[c[i].getID() - 1];
         if (p == null) {
             // no prof available
+            int a = c[i].getEnrollment();
             c[i].cancel(); //* decrease enrollment 
-            return false;
+            ret.updateSPV(a);
+            ret.updateConflict(true);
+            return ret;
         }
         c[i].assignProf(p.getName());
         p.addCourse(c[i]);
         if ((p.getCourses()[0] != null) && (p.getCourses()[1] != null)) {
             if (p.getCourses()[0].getTime() == p.getCourses()[1].getTime()) {
-                return true;
+                ret.updateConflict(true);
+                return ret;
             }
         }
-        return false;
+        return ret;
     }
 
     public static int resolveProfConflicts(int i, Professor[] pf, Course[] c, int n) {
@@ -70,15 +76,51 @@ public class Scheduling {
         // int timeSlots = cons.getTimeSlots();
         int timeSlots = 17;
         Course[] courses = cons.getCourses();
+        int[] labs = cons.getLabs();
+        //System.out.println(Arrays.toString(labs));
+
         Room[] rooms = cons.getRooms();
+
         //Professor[] profs = cons.getProfs();
         Student[] students = new Student[IO.getStudents(studentPrefs) + 1];
 
         Professor[] profAvailability = Arrays.copyOfRange(cons.getPCPairs(), 1, courses.length);
         Conflict[] conflicts = new Conflict[courses.length];
 
-        int spv = IO.populateCourses(studentPrefs, courses, conflicts, students) * 4;
+        int spv = IO.populateCourses(studentPrefs, courses, labs, conflicts, students) * 4;
         double spvu = spv;
+
+        // Arrays.sort(rooms, Comparator.nullsLast(new RoomTypeComparator()));
+        // for (Room r : rooms) {
+        //     if (r != null) {
+        //         System.out.println(r.toString());
+        //     }
+        // }
+
+        Room[] npr = new Room[rooms.length];
+        Room[] pr = new Room[rooms.length];
+        for (int i = 0; i < rooms.length; i++) {
+            if (rooms[i] != null) {
+                if(!rooms[i].isInPark()) {
+                    npr[i] = rooms[i];
+                } else {
+                    pr[i] = rooms[i];
+                }
+            }
+        }
+        Arrays.sort(npr, Comparator.nullsLast(new RoomComparator()));
+        Arrays.sort(pr, Comparator.nullsLast(new RoomComparator()));
+        // for (Room r : npr) {
+        //     if (r != null) {
+        //         System.out.println(r.toString());
+        //     }
+        // }
+        // System.out.println("===============");
+        // for (Room r : pr) {
+        //     if (r != null) {
+        //         System.out.println(r.toString());
+        //     }
+        // }
 
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseEnrollmentComparator()));
@@ -86,48 +128,93 @@ public class Scheduling {
 
         int timeAvailability = timeSlots;
         int currentRoom = 0;
+        int currentNPRoom = 0;
+        int currentPRoom = 0;
         for (int i = 0; i < courses.length; i++) {
             if (courses[i] != null) {
 
                 //emily balch sems are always scheduled in time 2
                 if (courses[i] != null && ((courses[i].getID() == 001) || (courses[i].getID() == 002))) {
-                    courses[i].assignRoom(rooms[currentRoom]);
+                    courses[i].assignRoom(rooms[currentNPRoom]);
                     timeAvailability--;
                     courses[i].assignTime(2);
-                } 
-                if (timeAvailability > 0) {
+                } else if (!courses[i].hasLab()) {
+                    if (timeAvailability > 0) {
+                        courses[i].assignRoom(rooms[currentNPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
+                        Return ret = checkProfConflicts(i, profAvailability, courses);
+                        if (ret.hasConflict()) {
+                            if (ret.getSPV() == 0) {
+                                spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                            } else {
+                                spv = spv - ret.getSPV();
+                            }
+                            
+                        }
+    
+                        spv = resolveCapConflicts(i, courses, students, spv);
 
-                    courses[i].assignRoom(rooms[currentRoom]);
-                    timeAvailability--;
-                    courses[i].assignTime(timeSlots - timeAvailability);
-
-
-                    if (checkProfConflicts(i, profAvailability, courses)) {
-                        spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                    } else if (currentNPRoom >= (npr.length - 1)) {
+                        break;
+                    } else {
+                        currentNPRoom++;
+                        timeAvailability = timeSlots;
+                        courses[i].assignRoom(rooms[currentNPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
+    
+                        Return ret = checkProfConflicts(i, profAvailability, courses);
+                        if (ret.hasConflict()) {
+                            if (ret.getSPV() == 0) {
+                                spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                            } else {
+                                spv = spv - ret.getSPV();
+                            }
+                            
+                        }
+    
+                        spv = resolveCapConflicts(i, courses, students, spv);
                     }
-
-                    spv = resolveCapConflicts(i, courses, students, spv);
-
-                    
-                } else if (currentRoom >= (rooms.length - 1)) {
-                    break;
                 } else {
+                    if (timeAvailability > 0) {
+                        courses[i].assignRoom(rooms[currentPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
 
-                    currentRoom++;
-                    timeAvailability = timeSlots;
-                    courses[i].assignRoom(rooms[currentRoom]);
-                    timeAvailability--;
-                    courses[i].assignTime(timeSlots - timeAvailability);
+                        Return ret = checkProfConflicts(i, profAvailability, courses);
+                        if (ret.hasConflict()) {
+                            if (ret.getSPV() == 0) {
+                                spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                            } else {
+                                spv = spv - ret.getSPV();
+                            }
+                            
+                        }
+    
+                        spv = resolveCapConflicts(i, courses, students, spv);
 
-                    if (checkProfConflicts(i, profAvailability, courses)) {
-                        spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                    } else if (currentPRoom >= (pr.length - 1)) {
+                        break;
+                    } else {
+                        currentPRoom++;
+                        timeAvailability = timeSlots;
+                        courses[i].assignRoom(rooms[currentPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
+    
+                        Return ret = checkProfConflicts(i, profAvailability, courses);
+                        if (ret.hasConflict()) {
+                            if (ret.getSPV() == 0) {
+                                spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                            } else {
+                                spv = spv - ret.getSPV();
+                            }
+                            
+                        }
+    
+                        spv = resolveCapConflicts(i, courses, students, spv);
                     }
-
-                    spv = resolveCapConflicts(i, courses, students, spv);
-
-
-                    
-
                 }
             }
         }
@@ -138,7 +225,7 @@ public class Scheduling {
         Set<Integer> numSet = new HashSet<Integer>();
         int currentTime = 1;
         for (int i = 1; i < courses.length - 1; i++) {
-            System.out.println(Arrays.toString(courses[i].getRoster()));
+            //System.out.println(Arrays.toString(courses[i].getRoster()));
             if (courses[i].getTime() == currentTime) {
                 for(int s : courses[i].getRoster()){
                     if(!numSet.add(s)){
@@ -206,6 +293,13 @@ class RoomComparator implements Comparator<Room> {
     @Override
     public int compare(Room r1, Room r2) {
         return r2.getCapacity() - r1.getCapacity();
+    }
+}
+
+class RoomTypeComparator implements Comparator<Room> {
+    @Override
+    public int compare(Room r1, Room r2) {
+        return Boolean.compare(r2.isInPark(), r1.isInPark());
     }
 }
 

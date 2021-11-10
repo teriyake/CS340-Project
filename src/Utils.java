@@ -318,7 +318,7 @@ public class Utils {
 
     }
 
-    public static int findParkRooms(String f, String c) {
+    public static int findParkRooms(String f, String c, HashMap<Integer, Integer> rc) {
         int ret = 0;
 
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
@@ -327,13 +327,22 @@ public class Utils {
             br.readLine();
             String l;
             int n = ret;
+            int id = 0;
+            while ((l = br.readLine()) != null) {
+                String[] ls = l.split("\\s+");
+                if (ls[0].equals("Rooms")) {
+                    break;
+                }
+            }
 
             while ((l = br.readLine()) != null) {
+                id++;
                 String[] ls = l.split("\\s+");
                 if (ls[0].equals("Classes")) {
                     break;
                 }
                 if (ls[0].startsWith("PK")) {
+                    rc.put(id, Integer.parseInt(ls[1]));
                     // System.out.println(ls[0]);
                     n++;
                 }
@@ -349,6 +358,7 @@ public class Utils {
             // raf.close();
 
             ret = n;
+            System.out.println(rc.toString());
             
         } catch (IOException e) {
             e.printStackTrace();
@@ -357,7 +367,7 @@ public class Utils {
         return ret;
     }
 
-    public static void updateRooms(String f, int r) {
+    public static void updateRooms(String f, int r, HashMap<Integer, Integer> rc) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(f));
             BufferedWriter bw = new BufferedWriter(new FileWriter("~rooms"));
@@ -365,12 +375,23 @@ public class Utils {
 
             while ((l = br.readLine()) != null) {
                 String[] ls = l.split("\\s+");
-                if (ls[0].equals("Rooms")) {
-                    bw.write(String.format("%s %d", l, r));
-                    bw.newLine();
-                } else {
+                if (!isInt(ls[0])) {
                     bw.write(l);
                     bw.newLine();
+                } else {
+                    if (ls.length > 2) {
+                        bw.write(l);
+                        bw.newLine();
+                        continue;
+                    } else {
+                        if (rc.containsKey(Integer.parseInt(ls[0]))) {
+                            bw.write(l + " P");
+                            bw.newLine();
+                        } else {
+                            bw.write(l);
+                            bw.newLine();
+                        }
+                    }
                 }
             }
 
@@ -400,11 +421,12 @@ public class Utils {
         ArrayList<String> labs = new ArrayList<String>();
         ArrayList<Double> times = new ArrayList<Double>();
         ArrayList<String> courses = new ArrayList<String>();
+        HashMap<Integer, Integer> parkRC = new HashMap<Integer, Integer>();
         int timeSlots = 0;
         int parkRooms = 0;
-        StringBuilder sb1 = new StringBuilder();
-        StringBuilder sb2 = new StringBuilder();
-        StringBuilder r = new StringBuilder();
+        // StringBuilder sb1 = new StringBuilder();
+        // StringBuilder sb2 = new StringBuilder();
+        // StringBuilder r = new StringBuilder();
 
         getDepts(enrollmentData, departments);
         // for (String dept : departments) {
@@ -423,12 +445,12 @@ public class Utils {
 
         addLabs(cons, outputLabs);
     
-        parkRooms = findParkRooms(preprocessedCons, cons);
+        parkRooms = findParkRooms(preprocessedCons, cons, parkRC);
 
         // System.out.println(sb1.toString());
         // String pr = r.toString() + " " + parkRooms + "\n";
         // System.out.println(sb2.toString());
         
-        updateRooms(cons, parkRooms);
+        updateRooms(cons, parkRooms, parkRC);
     }
 }

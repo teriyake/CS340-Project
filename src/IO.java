@@ -21,7 +21,7 @@ public class IO {
         return ret;
     }
 
-    public static int populateCourses(String f, Course[] courses, Conflict[] conflicts, Student[] students) {
+    public static int populateCourses(String f, Course[] courses, int[] labs, Conflict[] conflicts, Student[] students) {
 
         int s = 0;
 
@@ -89,17 +89,31 @@ public class IO {
                     c = Integer.parseInt(ls[1]);
                     break;
                 } else {
-                    cons.addRoom(Integer.parseInt(ls[0]), Integer.parseInt(ls[1]));
+                    if (ls.length > 2) {
+                        cons.addRoomP(Integer.parseInt(ls[0]), Integer.parseInt(ls[1]), true);
+                    } else {
+                        cons.addRoom(Integer.parseInt(ls[0]), Integer.parseInt(ls[1]));
+                    }
                 }
             }
 
-            p = Integer.parseInt(br.readLine().split("\\s+")[1]);
+            l = br.readLine();
+            String[] lss = l.split("\\s+");
+            p = Integer.parseInt(lss[1]);
 
             cons.addProfCons(p);
             cons.addCourses(c);
+            cons.addLabs(c);
+
+            if (lss.length > 2) {
+                cons.addLabs(Integer.parseInt(lss[0]));
+            }
 
             while ((l = br.readLine()) != null) {
                 String[] ls = l.split("\\s+");
+                if (ls.length > 2) {
+                    cons.addLab(Integer.parseInt(ls[0]));
+                }
                 if (cons.getProfs()[Integer.parseInt(ls[1])] == null) {
                     Professor newProf = new Professor(Integer.parseInt(ls[1]), Integer.parseInt(ls[0]));
                     cons.addProf(Integer.parseInt(ls[1]), newProf);
