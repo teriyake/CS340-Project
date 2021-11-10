@@ -9,19 +9,21 @@ public class Course {
     private int prof;
     private int enrollment;
     private int[] roster;
+    private boolean hasLab;
     //HashMap<Integer, Student> students = new HashMap<>();
 
-    public Course(int id, int t, Room r, int p, int e, int n) {
+    public Course(int id, int t, Room r, int p, int e, int n, boolean l) {
         this.ID = id;
         this.time = t;
         this.room = r;
         this.prof = p;
         this.enrollment = e;
         this.roster = new int[n + 1];
+        this.hasLab = l;
     }
 
     public Course(int id, int n) {
-        this(id, 0, null, 0, 0, n);
+        this(id, 0, null, 0, 0, n, false);
     }
 
     public int getID() {
@@ -39,6 +41,14 @@ public class Course {
     public int getEnrollment() {
         return this.enrollment;
     } 
+    public boolean hasLab() {
+        return this.hasLab;
+    }
+
+    public void addLab() {
+        this.hasLab = true;
+    }
+
     public int[] removeZ() {
         int[] ret = new int[this.enrollment];
         if (ret.length == 0) {
