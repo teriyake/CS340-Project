@@ -121,10 +121,12 @@ public class IO {
             for (Course c : courses) {
                 if (c != null) {
                     int r = 1;
-                    if (c.getRoom() == null) {
+                    if ((c.getRoom() == null) || (c.getProf() == 0)) {
                         r = 0;
-                        bw.write(String.format("%d\t%d\t%d\t%d\t%s\n", 
-                        c.getID(), r, c.getProf(), c.getTime(), c.getRosterStr()));
+                        // bw.write(String.format("%d\t%d\t%d\t%d\t%s\n", 
+                        // c.getID(), r, c.getProf(), c.getTime(), c.getRosterStr()));
+                        bw.write(String.format("%d\t%d\t0\t0\t0\n", 
+                        c.getID(), r));
                     } else {
                         bw.write(String.format("%d\t%d\t%d\t%d\t%s\n", 
                         c.getID(), c.getRoom().getNumber(), c.getProf(), c.getTime(), c.getRosterStr()));

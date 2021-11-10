@@ -11,6 +11,8 @@ public class Scheduling {
     public static boolean checkProfConflicts(int i, Professor[] pf, Course[] c) {
         Professor p = pf[c[i].getID() - 1];
         if (p == null) {
+            // no prof available
+            c[i].cancel(); //* decrease enrollment 
             return false;
         }
         c[i].assignProf(p.getName());
@@ -65,7 +67,7 @@ public class Scheduling {
         } 
 
         Constraints cons = IO.constraints(constraints);
-        //int timeSlots = cons.getTimeSlots();
+        // int timeSlots = cons.getTimeSlots();
         int timeSlots = 17;
         Course[] courses = cons.getCourses();
         Room[] rooms = cons.getRooms();
@@ -156,15 +158,18 @@ public class Scheduling {
         }
 
         //* testing
-        System.out.println(Arrays.toString(students));
-        for (Course c : students[7].getCoursesO()) {
-            if (c != null) {
-                System.out.println(c.toString());
-            }
-            if (c == null) {
-                System.out.println(c);
-            }
-        }
+        // System.out.println(Arrays.toString(students));
+        // for (Course c : students[7].getCoursesO()) {
+        //     if (c != null) {
+        //         System.out.println(c.toString());
+        //     }
+        //     if (c == null) {
+        //         System.out.println(c);
+        //     }
+        // }
+
+       
+        // Arrays.sort(profAvailability, Comparator.nullsLast(new ProfComparator()));
 
         IO.generateSchedule(courses, outputFile);
         System.out.println(String.format("Student Preference Value: %d (%.2f)\n", spv, (spv / spvu)));
@@ -201,5 +206,12 @@ class RoomComparator implements Comparator<Room> {
     @Override
     public int compare(Room r1, Room r2) {
         return r2.getCapacity() - r1.getCapacity();
+    }
+}
+
+class ProfComparator implements Comparator<Professor> {
+    @Override
+    public int compare(Professor p1, Professor p2) {
+        return p1.getName() - p2.getName();
     }
 }

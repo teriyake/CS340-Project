@@ -41,6 +41,9 @@ public class Course {
     } 
     public int[] removeZ() {
         int[] ret = new int[this.enrollment];
+        if (ret.length == 0) {
+            return ret;
+        }
         for (int i = 0; i < this.roster.length; i++) {
             if (this.roster[i + 1] != 0) {
                 ret[i] = this.roster[i + 1];

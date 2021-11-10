@@ -58,11 +58,11 @@ public class Constraints {
     public void addProf(int n, Professor p) {
         this.profs[n] = p;
         this.pcPairs[p.getC1()] = p;
-        this.pcPairs[p.getC2()] = p;
+        // this.pcPairs[p.getC2()] = p;
     }
 
     public void editProf(int p, int c) {
-        this.pcPairs[profs[p].getC2()] = null;
+        // this.pcPairs[profs[p].getC2()] = null;
         this.profs[p].editC2(c);
         this.pcPairs[c] = profs[p];
     }
