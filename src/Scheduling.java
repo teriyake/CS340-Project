@@ -143,43 +143,73 @@ public class Scheduling {
 
                 //emily balch sems are always scheduled in time 2
                 if (courses[i] != null && ((courses[i].getID() == 001) || (courses[i].getID() == 002))) {
-                    courses[i].assignRoom(rooms[currentRoom]);
+                    courses[i].assignRoom(rooms[currentNPRoom]);
                     timeAvailability--;
+                    currentNPRoom++;
                     courses[i].assignTime(2);
+                    continue;
                 } 
-                if (timeAvailability > 0) {
 
-                    courses[i].assignRoom(rooms[currentRoom]);
-                    timeAvailability--;
-                    courses[i].assignTime(timeSlots - timeAvailability);
+                if (courses[i].hasLab()) {
+                    if (timeAvailability > 0) {
+                        courses[i].assignRoom(rooms[currentPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
 
 
-                    if (checkProfConflicts(i, profAvailability, courses)) {
-                        spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                        if (checkProfConflicts(i, profAvailability, courses)) {
+                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                        }
+
+                        spv = resolveCapConflicts(i, courses, students, spv);
+                        
+                    } else if (currentPRoom >= (pr.length - 1)) {
+                        break;
+                    } else {
+
+                        currentPRoom++;
+                        timeAvailability = timeSlots;
+                        courses[i].assignRoom(rooms[currentPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
+
+                        if (checkProfConflicts(i, profAvailability, courses)) {
+                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                        }
+
+                        spv = resolveCapConflicts(i, courses, students, spv);
+
                     }
-
-                    spv = resolveCapConflicts(i, courses, students, spv);
-
-                    
-                } else if (currentRoom >= (rooms.length - 1)) {
-                    break;
                 } else {
+                    if (timeAvailability > 0) {
+                        courses[i].assignRoom(rooms[currentNPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
 
-                    currentRoom++;
-                    timeAvailability = timeSlots;
-                    courses[i].assignRoom(rooms[currentRoom]);
-                    timeAvailability--;
-                    courses[i].assignTime(timeSlots - timeAvailability);
 
-                    if (checkProfConflicts(i, profAvailability, courses)) {
-                        spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                        if (checkProfConflicts(i, profAvailability, courses)) {
+                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                        }
+
+                        spv = resolveCapConflicts(i, courses, students, spv);
+                        
+                    } else if (currentNPRoom >= (npr.length - 1)) {
+                        break;
+                    } else {
+
+                        currentNPRoom++;
+                        timeAvailability = timeSlots;
+                        courses[i].assignRoom(rooms[currentNPRoom]);
+                        timeAvailability--;
+                        courses[i].assignTime(timeSlots - timeAvailability);
+
+                        if (checkProfConflicts(i, profAvailability, courses)) {
+                            spv = resolveProfConflicts(i, profAvailability, courses, spv);
+                        }
+
+                        spv = resolveCapConflicts(i, courses, students, spv);
+
                     }
-
-                    spv = resolveCapConflicts(i, courses, students, spv);
-
-
-                    
-
                 }
             }
             
