@@ -39,5 +39,6 @@ If ```java Scheduling``` receives no argument, it will use the constraints & pre
 ## Credits
 Collaborators: Silvia Alemany, Teri Ke, Paige Schaefer
 
-```.\data\mask_data.py```: Trang Dang
-
+```.\src\data\mask_data.py```: Trang Dang
+## Notes
+```.\src\is_valid.pl``` does not work
