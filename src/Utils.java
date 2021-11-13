@@ -414,6 +414,14 @@ public class Utils {
         String preprocessedCons = "./data/c_s15";
         String outputLabs = "./data/l_s15";
         String cons = "./data/c_5";
+
+        if (args.length != 0) {
+            enrollmentData = args[0];
+            preprocessedCons = args[1];
+            cons = args[2];
+            outputLabs = "./data/~labs";
+        } 
+
         ArrayList<String> departments = new ArrayList<String>();
         ArrayList<String> labs = new ArrayList<String>();
         ArrayList<Double> times = new ArrayList<Double>();
