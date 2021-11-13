@@ -1,5 +1,3 @@
-import java.util.Arrays;
-
 public class Conflict {
     private int num;
     private Course course;

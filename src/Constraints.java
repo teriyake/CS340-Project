@@ -86,6 +86,12 @@ public class Constraints {
         this.labs[c] = 1;
     }
 
+    public void rmNulls(int n) {
+        Course[] newC = new Course[n];
+        System.arraycopy(courses, 0, newC, 0, n);
+        this.courses = newC;
+    }
+
     public int getTotalTimes() {
         return this.timeSlots;
     }

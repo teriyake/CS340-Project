@@ -1,6 +1,3 @@
-import java.util.Arrays;
-import java.util.HashMap;
-
 public class Course {
 
     private int ID;
@@ -10,7 +7,6 @@ public class Course {
     private int enrollment;
     private int[] roster;
     private boolean hasLab;
-    //HashMap<Integer, Student> students = new HashMap<>();
 
     public Course(int id, int t, Room r, int p, int e, int n, boolean l) {
         this.ID = id;
@@ -76,7 +72,7 @@ public class Course {
         String ret = "";
         for (int i = 1; i < this.roster.length; i++) {
             if (roster[i] == 0) {
-                break;
+                continue;
             } else {
                 ret += roster[i] + " ";
             }
@@ -130,9 +126,9 @@ public class Course {
     }
 
     public void unenroll(int n) {
-        for (int s : this.getRoster()) {
-            if (s == n) {
-                s = 0;
+        for (int i = 0; i < this.roster.length; i++) {
+            if (roster[i] == n) {
+                roster[i] = 0;
                 this.enrollment--;
             }
         }

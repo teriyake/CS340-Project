@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.imageio.plugins.bmp.BMPImageWriteParam;
-
 public class Utils {
 
     public static boolean isInt (String str) {
@@ -159,7 +157,6 @@ public class Utils {
                 if (ls[12].equals("")) {
                     continue;
                 }
-                //System.out.println(ls[1]);
                 if (ls[12].endsWith("AM")) {
                     startHM = ls[12].split("AM")[0].trim();
                     String[] shm = startHM.split(":");

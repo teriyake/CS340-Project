@@ -33,31 +33,33 @@ public class IO {
                 String[] ls = l.split("\\s+");
 
                 for (int i = 1; i < ls.length; i++) {
-                    if (courses[Integer.parseInt(ls[i])] != null) {
-                        //System.out.println(courses[i]);
-                        courses[Integer.parseInt(ls[i])].enroll(Integer.parseInt(ls[0]));
+                    if (Integer.parseInt(ls[i]) < courses.length) {
+                        if (courses[Integer.parseInt(ls[i])] != null) {
+                            //System.out.println(courses[i]);
+                            courses[Integer.parseInt(ls[i])].enroll(Integer.parseInt(ls[0]));
 
-                        if (students[Integer.parseInt(ls[0])] != null) {
-                            students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
+                            if (students[Integer.parseInt(ls[0])] != null) {
+                                students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
+                            } else {
+                                Student newStudent = new Student(Integer.parseInt(ls[0]));
+                                students[Integer.parseInt(ls[0])] = newStudent;
+                                newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
+                            }
+                            
                         } else {
-                            Student newStudent = new Student(Integer.parseInt(ls[0]));
-                            students[Integer.parseInt(ls[0])] = newStudent;
-                            newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
-                        }
-                        
-                    } else {
-                        Course c = new Course(Integer.parseInt(ls[i]), s);
-                        courses[Integer.parseInt(ls[i])] = c;
-                        c.enroll(Integer.parseInt(ls[0]));
+                            Course c = new Course(Integer.parseInt(ls[i]), s);
+                            courses[Integer.parseInt(ls[i])] = c;
+                            c.enroll(Integer.parseInt(ls[0]));
 
-                        if (students[Integer.parseInt(ls[0])] != null) {
-                            students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
-                        } else {
-                            Student newStudent = new Student(Integer.parseInt(ls[0]));
-                            students[Integer.parseInt(ls[0])] = newStudent;
-                            newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
+                            if (students[Integer.parseInt(ls[0])] != null) {
+                                students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
+                            } else {
+                                Student newStudent = new Student(Integer.parseInt(ls[0]));
+                                students[Integer.parseInt(ls[0])] = newStudent;
+                                newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
+                            }
+                            
                         }
-                        
                     }
                 }
             }
@@ -105,11 +107,13 @@ public class IO {
             cons.addCourses(c);
             cons.addLabs(c);
 
+            int cc = 1;
             if (lss.length > 2) {
                 cons.addLabs(Integer.parseInt(lss[0]));
             }
 
             while ((l = br.readLine()) != null) {
+                cc++;
                 String[] ls = l.split("\\s+");
                 if (ls.length > 2) {
                     cons.addLab(Integer.parseInt(ls[0]));
@@ -121,10 +125,13 @@ public class IO {
                     cons.editProf(Integer.parseInt(ls[1]), Integer.parseInt(ls[0]));
                 }
             }
-            
+            if (cc < c) {
+                cons.rmNulls(cc);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
 
         return cons;
     }
