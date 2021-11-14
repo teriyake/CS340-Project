@@ -8,6 +8,17 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 public class IO {
+    public static int getBusSchedule(String f) {
+        int ret = 0;
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+            ret = Integer.parseInt(br.readLine().split("\\s+")[1]);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
 
     public static int getStudents(String f) {
         int ret = 0;
