@@ -7,13 +7,15 @@ import java.util.HashSet;
 
 public class Scheduling {
 
-    public static Boolean checkProfConflicts(int i, Professor[] pf, Course[] c) {
+    public static Boolean checkProfConflicts(int i, Professor[] pf, Course[] c, HashMap<Integer, HashSet<Integer>> overlaps) {
         Professor p = pf[i];
         if ((p == null) || (c[p.getC1()] == null) || (c[p.getC2()] == null)) {
             return false;
         }
         if ((p.getC1() != 0) && (p.getC2() != 0)) {
-            if (c[p.getC1()].getTime() == c[p.getC2()].getTime()) {
+            Integer c1Time = c[p.getC1()].getTime();
+            Integer c2Time= c[p.getC2()].getTime();
+            if (overlaps.containsKey(c1Time) && overlaps.get(c1Time).contains(c2Time)) {
                 return true;
             }
         }
@@ -27,12 +29,18 @@ public class Scheduling {
         }
 
         for (int t = 0; t < 4; i++) {
+            //System.out.println("t=" + t);
             for (int r = 0; r < rooms.length; r++) {
+                //System.out.println("r=" + r);
                 if (nca[t][r] == 0) {
-                    c[i].assignTime(t + timeSlots + 1);
-                    c[i].assignRoom(rooms[t]);
-                    nca[t][r] = 1;
-                    return n;
+                    if(c[i] == null) {
+                        continue;
+                    } else {
+                        c[i].assignTime(t + timeSlots + 1);
+                        c[i].assignRoom(rooms[t]);
+                        nca[t][r] = 1;
+                        return n;
+                    }
                 }
             }
             n = n - c[i].getEnrollment();
@@ -102,8 +110,10 @@ public class Scheduling {
         } 
 
         Constraints cons = IO.constraints(constraints);
-        // int timeSlots = cons.getTimeSlots();
-        int timeSlots = 14;
+        //int timeSlots = cons.getTimeSlots();
+        int timeSlots = 19;
+        HashMap<Integer, TimeSlot> slotList = cons.getSlots(5, 5, 8, 4);
+        HashMap<Integer, HashSet<Integer>> overlaps = TimeSlot.overlapping(slotList);
         Course[] courses = cons.getCourses();
         int[] labs = cons.getLabs();
         Room[] rooms = cons.getRooms();
@@ -133,6 +143,8 @@ public class Scheduling {
         Arrays.sort(courses, Comparator.nullsLast(new CourseEnrollmentComparator()));
         Arrays.sort(rooms, Comparator.nullsLast(new RoomComparator()));
 
+        //System.out.println(overlaps.toString());
+
         int timeAvailability = timeSlots;
         // int currentRoom = 0;
         int currentNPRoom = 0;
@@ -140,14 +152,32 @@ public class Scheduling {
         int[][] nightClassesAvailability = new int[4][rooms.length];
         
         for (int i = 0; i < courses.length; i++) {
+            //emily balch sems are always scheduled in time 2 - (always parsed from 001 or 002)
             if (courses[i] != null) {
+                if (timeAvailability == 0) {
+                    currentNPRoom++;
+                    timeAvailability = timeSlots;
+                }             
+                boolean flag = false;
+                for (int r = 0; r < rooms[currentNPRoom].schedule.size(); r++) {              
+                    int slot = rooms[currentNPRoom].getSchedule().get(r);
+                    if ((overlaps.get(timeAvailability)).contains(slot)) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag) {
+                    i--;
+                    timeAvailability--;
+                    continue;
+                } 
+                if ((courses[i].getID() == 1) || (courses[i].getID() == 2)) {
 
-                //emily balch sems are always scheduled in time 2
-                if (courses[i] != null && ((courses[i].getID() == 001) || (courses[i].getID() == 002))) {
                     courses[i].assignRoom(rooms[currentNPRoom]);
                     timeAvailability--;
                     currentNPRoom++;
                     courses[i].assignTime(2);
+                    rooms[currentNPRoom].schedule.add(2);
                     courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                     profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     continue;
@@ -170,8 +200,8 @@ public class Scheduling {
                         courses[i].assignTime(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
-                    }
-                } else {
+                    }   
+                 } else {
                     if (timeAvailability > 0) {
                         courses[i].assignRoom(rooms[currentNPRoom]);
                         timeAvailability--;
@@ -190,13 +220,13 @@ public class Scheduling {
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     }
                 }
-            }
-            
+                rooms[currentNPRoom].addTime(timeSlots - timeAvailability);
+            }  
         }
 
         for (int i = 0; i < courses.length; i++) {
             if (courses[i] != null) {
-                if (checkProfConflicts(i, profAvailability, courses)) {
+                if (checkProfConflicts(i, profAvailability, courses, overlaps)) {
                     int nspv = resolveProfConflicts(i, profAvailability, courses, spv, timeSlots, nightClassesAvailability, rooms);
                     if (nspv == spv) {
                     }
@@ -206,37 +236,41 @@ public class Scheduling {
                     spv = resolveCapConflicts(i, courses, students, spv);
                 }
             }
-
         }
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseTimeComparator()));
         
-        Set<Integer> numSet = new HashSet<Integer>();
+        HashMap<Integer, HashSet<Integer>> numSet = new HashMap<Integer, HashSet<Integer>>();
         int currentTime = 1;
         int ttttt = 0;
+        for(int k = 1; k < (timeSlots + 4); k++) {
+            numSet.put(k, new HashSet<Integer>());
+        }
         for (int i = 1; i < courses.length - 1; i++) {
             if (courses[i].getTime() == currentTime) {
                 for(int s : courses[i].getRoster()){
-                    if(!numSet.add(s)){
-                        if (!droppedStudents.containsKey(courses[i].getID())) {
-                            ArrayList<Student> nds = new ArrayList<>();
-                            nds.add(students[s]);
-                            droppedStudents.put(courses[i].getID(), nds);
-                        } else {
-                            droppedStudents.get(courses[i].getID()).add(students[s]);
+                    for (Integer t : overlaps.get(currentTime)) {
+                        if(!(numSet.get(t)).add(s)) {
+                            if (!droppedStudents.containsKey(courses[i].getID())) {
+                                ArrayList<Student> nds = new ArrayList<>();
+                                nds.add(students[s]);
+                                droppedStudents.put(courses[i].getID(), nds);
+                            } else {
+                                droppedStudents.get(courses[i].getID()).add(students[s]);
+                            }
+                            courses[i].unenroll(s);
+                            students[s].removeCourseO(courses[i]);
+                            spv--;
+                            ttttt++;
                         }
-                        courses[i].unenroll(s);
-                        students[s].removeCourseO(courses[i]);
-                        spv--;
-                        ttttt++;
-                        System.out.printf("%d\tStudent #%d dropped due to conflict at time %d course %d\n", ttttt, students[s].getName(), currentTime, courses[i].getID());
                     }
                 }
             } else {
                 currentTime = courses[i].getTime();
-                numSet = new HashSet<Integer>();
                 for (int s : courses[i].getRoster()) {
-                    numSet.add(s);
+                    HashSet<Integer> n = numSet.get(currentTime);
+                    n.add(s);
+                    numSet.put(currentTime, n);
                 }
             }
             

@@ -6,19 +6,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class IO {
-    public static int getBusSchedule(String f) {
-        int ret = 0;
-        
-        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
-            ret = Integer.parseInt(br.readLine().split("\\s+")[1]);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return ret;
-    }
 
     public static int getStudents(String f) {
         int ret = 0;
@@ -46,30 +36,27 @@ public class IO {
                 for (int i = 1; i < ls.length; i++) {
                     if (Integer.parseInt(ls[i]) < courses.length) {
                         if (courses[Integer.parseInt(ls[i])] != null) {
-                            //System.out.println(courses[i]);
                             courses[Integer.parseInt(ls[i])].enroll(Integer.parseInt(ls[0]));
-
                             if (students[Integer.parseInt(ls[0])] != null) {
                                 students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
                             } else {
-                                Student newStudent = new Student(Integer.parseInt(ls[0]));
+                                Student newStudent = new Student(Integer.parseInt(ls[0]), ls.length-1);
                                 students[Integer.parseInt(ls[0])] = newStudent;
                                 newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
-                            }
-                            
+                            }                    
                         } else {
                             Course c = new Course(Integer.parseInt(ls[i]), s);
                             courses[Integer.parseInt(ls[i])] = c;
                             c.enroll(Integer.parseInt(ls[0]));
-
+                            //System.out.println(ls.length);
                             if (students[Integer.parseInt(ls[0])] != null) {
                                 students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
                             } else {
-                                Student newStudent = new Student(Integer.parseInt(ls[0]));
+                                Student newStudent = new Student(Integer.parseInt(ls[0]), ls.length-1);
                                 students[Integer.parseInt(ls[0])] = newStudent;
                                 newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
-                            }
-                            
+                            } 
+        
                         }
                     }
                 }
@@ -169,5 +156,6 @@ public class IO {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {}
 }
