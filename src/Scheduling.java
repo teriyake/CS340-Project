@@ -7,13 +7,15 @@ import java.util.HashSet;
 
 public class Scheduling {
 
-    public static Boolean checkProfConflicts(int i, Professor[] pf, Course[] c) {
+    public static Boolean checkProfConflicts(int i, Professor[] pf, Course[] c, HashMap<Integer, HashSet<Integer>> overlaps) {
         Professor p = pf[i];
         if ((p == null) || (c[p.getC1()] == null) || (c[p.getC2()] == null)) {
             return false;
         }
         if ((p.getC1() != 0) && (p.getC2() != 0)) {
-            if (c[p.getC1()].getTime() == c[p.getC2()].getTime()) {
+            Integer c1Time = c[p.getC1()].getTime();
+            Integer c2Time= c[p.getC2()].getTime();
+            if (overlaps.containsKey(c1Time) && overlaps.get(c1Time).contains(c2Time)) {
                 return true;
             }
         }
@@ -41,8 +43,8 @@ public class Scheduling {
                     }
                 }
             }
-            /*n = n - c[i].getEnrollment();
-            c[i].cancel();*/
+            n = n - c[i].getEnrollment();
+            c[i].cancel();
         }
             
         return n;
@@ -110,7 +112,7 @@ public class Scheduling {
         Constraints cons = IO.constraints(constraints);
         //int timeSlots = cons.getTimeSlots();
         int timeSlots = 19;
-        HashMap<Integer, TimeSlot> slotList = cons.getSlots(5, 5, 8);
+        HashMap<Integer, TimeSlot> slotList = cons.getSlots(5, 5, 8, 4);
         HashMap<Integer, HashSet<Integer>> overlaps = TimeSlot.overlapping(slotList);
         Course[] courses = cons.getCourses();
         int[] labs = cons.getLabs();
@@ -141,6 +143,8 @@ public class Scheduling {
         Arrays.sort(courses, Comparator.nullsLast(new CourseEnrollmentComparator()));
         Arrays.sort(rooms, Comparator.nullsLast(new RoomComparator()));
 
+        System.out.println(overlaps.toString());
+
         int timeAvailability = timeSlots;
         // int currentRoom = 0;
         int currentNPRoom = 0;
@@ -150,21 +154,23 @@ public class Scheduling {
         for (int i = 0; i < courses.length; i++) {
             //emily balch sems are always scheduled in time 2 - (always parsed from 001 or 002)
             if (courses[i] != null) {
-                if (overlaps.containsKey(timeAvailability)) {                    
-                    boolean flag = false;
-                    for (int r = 0; r < rooms[currentNPRoom].schedule.size(); r++) {
-                        int slot = rooms[currentNPRoom].schedule.get(r);
-                        if (overlaps.get(timeAvailability).contains(slot)) {
-                            flag = true;
-                            break;
-                        }
+                if (timeAvailability == 0) {
+                    currentNPRoom++;
+                    timeAvailability = timeSlots;
+                }             
+                boolean flag = false;
+                for (int r = 0; r < rooms[currentNPRoom].schedule.size(); r++) {              
+                    int slot = rooms[currentNPRoom].getSchedule().get(r);
+                    if ((overlaps.get(timeAvailability)).contains(slot)) {
+                        flag = true;
+                        break;
                     }
-                    if (flag) {
-                        timeAvailability++;
-                        i--;
-                        continue;
-                    } 
                 }
+                if (flag) {
+                    i--;
+                    timeAvailability--;
+                    continue;
+                } 
                 if ((courses[i].getID() == 1) || (courses[i].getID() == 2)) {
 
                     courses[i].assignRoom(rooms[currentNPRoom]);
@@ -182,7 +188,6 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
-                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     } else if (currentPRoom >= (pr.length - 1)) {
@@ -193,7 +198,6 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
-                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     }   
@@ -202,7 +206,6 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentNPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
-                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     } else if (currentNPRoom >= (npr.length - 1)) {
@@ -213,7 +216,6 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentNPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
-                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     }
@@ -224,7 +226,7 @@ public class Scheduling {
 
         for (int i = 0; i < courses.length; i++) {
             if (courses[i] != null) {
-                if (checkProfConflicts(i, profAvailability, courses)) {
+                if (checkProfConflicts(i, profAvailability, courses, overlaps)) {
                     int nspv = resolveProfConflicts(i, profAvailability, courses, spv, timeSlots, nightClassesAvailability, rooms);
                     if (nspv == spv) {
                     }
@@ -239,13 +241,31 @@ public class Scheduling {
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseTimeComparator()));
         
-        Set<Integer> numSet = new HashSet<Integer>();
+        HashMap<Integer, HashSet<Integer>> numSet = new HashMap<Integer, HashSet<Integer>>();
         int currentTime = 1;
         int ttttt = 0;
+        for(int k = 1; k < (timeSlots + 4); k++) {
+            numSet.put(k, new HashSet<Integer>());
+        }
         for (int i = 1; i < courses.length - 1; i++) {
             if (courses[i].getTime() == currentTime) {
                 for(int s : courses[i].getRoster()){
-                    if(!numSet.add(s)){
+                    for (Integer t : overlaps.get(currentTime)) {
+                        if(!(numSet.get(t)).add(s)) {
+                            if (!droppedStudents.containsKey(courses[i].getID())) {
+                                ArrayList<Student> nds = new ArrayList<>();
+                                nds.add(students[s]);
+                                droppedStudents.put(courses[i].getID(), nds);
+                            } else {
+                                droppedStudents.get(courses[i].getID()).add(students[s]);
+                            }
+                            courses[i].unenroll(s);
+                            students[s].removeCourseO(courses[i]);
+                            spv--;
+                            ttttt++;
+                        }
+                    }
+                    /*if(!(numSet.get(currentTime)).add(s)){
                         if (!droppedStudents.containsKey(courses[i].getID())) {
                             ArrayList<Student> nds = new ArrayList<>();
                             nds.add(students[s]);
@@ -258,13 +278,14 @@ public class Scheduling {
                         spv--;
                         ttttt++;
                         //System.out.printf("%d\tStudent #%d dropped due to conflict at time %d course %d\n", ttttt, students[s].getName(), currentTime, courses[i].getID());
-                    }
+                    }*/
                 }
             } else {
                 currentTime = courses[i].getTime();
-                numSet = new HashSet<Integer>();
                 for (int s : courses[i].getRoster()) {
-                    numSet.add(s);
+                    HashSet<Integer> n = numSet.get(currentTime);
+                    n.add(s);
+                    numSet.put(currentTime, n);
                 }
             }
             

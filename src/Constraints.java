@@ -113,22 +113,23 @@ public class Constraints {
         /**
      * generates hashmap with time slots enumerated so that we can see start & end times
      * this accomodates extension of taking overlappung slots into account
-     * @param t1 number of timeslots that meet in the 1st rotation pattern (MW)
-     * @param t2 number of timeslots that meet in the 2nd rotation pattern (TTH)
+     * @param t1 number of timeslots that meet in the 1st rotation pattern (TTH)
+     * @param t2 number of timeslots that meet in the 2nd rotation pattern (MW)
      * @param t3 number of timeslots that meet in the 3rd rotation pattern (MWF)
+     * @param t4 number of night blocks
      */
-    public HashMap<Integer, TimeSlot> getSlots(int t1, int t2, int t3){
+    public HashMap<Integer, TimeSlot> getSlots(int t1, int t2, int t3, int t4){
         HashMap<Integer, TimeSlot> times = new HashMap<Integer, TimeSlot>();
         double start = 8;
         // 1st rotation
         for (int i = 1; i <= t1; i++) {
-            times.put(i, new TimeSlot(start, start+1.5, 1));
+            times.put(i, new TimeSlot(start, start+1, 1));
             start += 1.5;
         }
         start = 8;
         // 2nd rotation
         for (int j = (t1 + 1); j <= (t1 + t2); j++) {
-            times.put(j, new TimeSlot(start, start+1.5, 2));
+            times.put(j, new TimeSlot(start, start+1, 2));
             start += 1.5;
         }
         // 3rd rotation
@@ -136,6 +137,12 @@ public class Constraints {
         for (int k = (t1 + t2 + 1); k <= (t1 + t2 + t3); k++) {
             times.put(k, new TimeSlot(start, start+1, 3));
             start += 1;
+        }
+        // these are the night blocks
+        start = 19;
+        for (int l = (t1 + t2 + t3 + 1); l <= (t1 + t2 + t3 + t4); l++) {
+            times.put(l, new TimeSlot(start, start+1, 1));
+            start += 3;
         }
         return times;
     }

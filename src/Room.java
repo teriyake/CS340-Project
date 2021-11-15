@@ -35,6 +35,9 @@ public class Room {
     public void addTime(Integer t) {
         this.schedule.add(t);
     }
+    public ArrayList<Integer> getSchedule() {
+        return this.schedule;
+    }
     public String toString() {
         return String.format("%d (Capacity: %d) Park: %b", this.number, this.capacity, this.isInPark);
     }
