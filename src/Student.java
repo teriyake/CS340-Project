@@ -41,6 +41,9 @@ public class Student {
         }
         return false; 
     }
+    public int getRequests() {
+        return this.requests;
+    }
 
     public boolean addCourseO(Course c) {
         for (int i = 0; i < coursesO.length; i++) {

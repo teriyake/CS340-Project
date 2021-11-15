@@ -25,7 +25,7 @@ public class IO {
     public static int populateCourses(String f, Course[] courses, int[] labs, Conflict[] conflicts, Student[] students) {
 
         int s = 0;
-
+        int spv = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             s = Integer.parseInt(br.readLine().split("\\s+")[1]);
             String l;
@@ -41,6 +41,7 @@ public class IO {
                                 students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
                             } else {
                                 Student newStudent = new Student(Integer.parseInt(ls[0]), ls.length-1);
+                                spv += newStudent.getRequests();
                                 students[Integer.parseInt(ls[0])] = newStudent;
                                 newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
                             }                    
@@ -53,10 +54,10 @@ public class IO {
                                 students[Integer.parseInt(ls[0])].addCourseO(courses[Integer.parseInt(ls[i])]);
                             } else {
                                 Student newStudent = new Student(Integer.parseInt(ls[0]), ls.length-1);
+                                spv += newStudent.getRequests();
                                 students[Integer.parseInt(ls[0])] = newStudent;
                                 newStudent.addCourseO(courses[Integer.parseInt(ls[i])]);
                             } 
-        
                         }
                     }
                 }
@@ -66,7 +67,7 @@ public class IO {
             e.printStackTrace();
         }
 
-        return s;
+        return spv;
     }
 
     public static Constraints constraints(String f) {
