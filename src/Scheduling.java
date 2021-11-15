@@ -143,7 +143,7 @@ public class Scheduling {
         Arrays.sort(courses, Comparator.nullsLast(new CourseEnrollmentComparator()));
         Arrays.sort(rooms, Comparator.nullsLast(new RoomComparator()));
 
-        System.out.println(overlaps.toString());
+        //System.out.println(overlaps.toString());
 
         int timeAvailability = timeSlots;
         // int currentRoom = 0;
@@ -236,7 +236,6 @@ public class Scheduling {
                     spv = resolveCapConflicts(i, courses, students, spv);
                 }
             }
-
         }
 
         Arrays.sort(courses, Comparator.nullsLast(new CourseTimeComparator()));
@@ -265,20 +264,6 @@ public class Scheduling {
                             ttttt++;
                         }
                     }
-                    /*if(!(numSet.get(currentTime)).add(s)){
-                        if (!droppedStudents.containsKey(courses[i].getID())) {
-                            ArrayList<Student> nds = new ArrayList<>();
-                            nds.add(students[s]);
-                            droppedStudents.put(courses[i].getID(), nds);
-                        } else {
-                            droppedStudents.get(courses[i].getID()).add(students[s]);
-                        }
-                        courses[i].unenroll(s);
-                        students[s].removeCourseO(courses[i]);
-                        spv--;
-                        ttttt++;
-                        //System.out.printf("%d\tStudent #%d dropped due to conflict at time %d course %d\n", ttttt, students[s].getName(), currentTime, courses[i].getID());
-                    }*/
                 }
             } else {
                 currentTime = courses[i].getTime();

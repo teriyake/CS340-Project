@@ -6,16 +6,18 @@ public class Student {
     private int[] courses;
     private Course[] coursesO;
     private int[] times;
+    private int requests;
 
     public Student(int n, int[] c, int[] t, Course[] cO) {
         this.name = n;
         this.courses = c;
         this.times = t;
         this.coursesO = cO;
+        this.requests = c.length;
     }
 
-    public Student(int n) {
-        this(n, new int[4], new int[2], new Course[4]);
+    public Student(int n, int rqs) {
+        this(n, new int[rqs], new int[2], new Course[rqs]);
     }
 
     public int getName() {
@@ -31,7 +33,7 @@ public class Student {
     }
 
     public boolean addCourse(int c) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < requests; i++) {
             if (this.courses[i] == 0) {
                 this.courses[i] = c;
                 return true;
@@ -74,7 +76,7 @@ public class Student {
     }
 
     public boolean removeCourse(int c) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < requests; i++) {
             if (this.courses[i] == c) {
                 this.courses[i] = 0;
                 return true;
@@ -84,7 +86,7 @@ public class Student {
     }
 
     public boolean removeCourseO(Course c) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < requests; i++) {
             if (this.coursesO[i] == c) {
                 this.coursesO[i] = null;
                 return true;
