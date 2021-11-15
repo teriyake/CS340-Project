@@ -27,16 +27,22 @@ public class Scheduling {
         }
 
         for (int t = 0; t < 4; i++) {
+            //System.out.println("t=" + t);
             for (int r = 0; r < rooms.length; r++) {
+                //System.out.println("r=" + r);
                 if (nca[t][r] == 0) {
-                    c[i].assignTime(t + timeSlots + 1);
-                    c[i].assignRoom(rooms[t]);
-                    nca[t][r] = 1;
-                    return n;
+                    if(c[i] == null) {
+                        continue;
+                    } else {
+                        c[i].assignTime(t + timeSlots + 1);
+                        c[i].assignRoom(rooms[t]);
+                        nca[t][r] = 1;
+                        return n;
+                    }
                 }
             }
-            n = n - c[i].getEnrollment();
-            c[i].cancel();
+            /*n = n - c[i].getEnrollment();
+            c[i].cancel();*/
         }
             
         return n;
@@ -102,8 +108,10 @@ public class Scheduling {
         } 
 
         Constraints cons = IO.constraints(constraints);
-        // int timeSlots = cons.getTimeSlots();
-        int timeSlots = 14;
+        //int timeSlots = cons.getTimeSlots();
+        int timeSlots = 19;
+        HashMap<Integer, TimeSlot> slotList = cons.getSlots(5, 5, 8);
+        HashMap<Integer, HashSet<Integer>> overlaps = TimeSlot.overlapping(slotList);
         Course[] courses = cons.getCourses();
         int[] labs = cons.getLabs();
         Room[] rooms = cons.getRooms();
@@ -140,14 +148,30 @@ public class Scheduling {
         int[][] nightClassesAvailability = new int[4][rooms.length];
         
         for (int i = 0; i < courses.length; i++) {
+            //emily balch sems are always scheduled in time 2 - (always parsed from 001 or 002)
             if (courses[i] != null) {
+                if (overlaps.containsKey(timeAvailability)) {                    
+                    boolean flag = false;
+                    for (int r = 0; r < rooms[currentNPRoom].schedule.size(); r++) {
+                        int slot = rooms[currentNPRoom].schedule.get(r);
+                        if (overlaps.get(timeAvailability).contains(slot)) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        timeAvailability++;
+                        i--;
+                        continue;
+                    } 
+                }
+                if ((courses[i].getID() == 1) || (courses[i].getID() == 2)) {
 
-                //emily balch sems are always scheduled in time 2
-                if (courses[i] != null && ((courses[i].getID() == 001) || (courses[i].getID() == 002))) {
                     courses[i].assignRoom(rooms[currentNPRoom]);
                     timeAvailability--;
                     currentNPRoom++;
                     courses[i].assignTime(2);
+                    rooms[currentNPRoom].schedule.add(2);
                     courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                     profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     continue;
@@ -158,6 +182,7 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
+                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     } else if (currentPRoom >= (pr.length - 1)) {
@@ -168,14 +193,16 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
+                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
-                    }
-                } else {
+                    }   
+                 } else {
                     if (timeAvailability > 0) {
                         courses[i].assignRoom(rooms[currentNPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
+                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     } else if (currentNPRoom >= (npr.length - 1)) {
@@ -186,12 +213,13 @@ public class Scheduling {
                         courses[i].assignRoom(rooms[currentNPRoom]);
                         timeAvailability--;
                         courses[i].assignTime(timeSlots - timeAvailability);
+                        //rooms[currentNPRoom].schedule.add(timeSlots - timeAvailability);
                         courses[i].assignProf(profAvailability[courses[i].getID() - 1].getName());
                         profAvailability[courses[i].getID() - 1].addCourse(courses[i]);
                     }
                 }
-            }
-            
+                rooms[currentNPRoom].addTime(timeSlots - timeAvailability);
+            }  
         }
 
         for (int i = 0; i < courses.length; i++) {
@@ -229,7 +257,7 @@ public class Scheduling {
                         students[s].removeCourseO(courses[i]);
                         spv--;
                         ttttt++;
-                        System.out.printf("%d\tStudent #%d dropped due to conflict at time %d course %d\n", ttttt, students[s].getName(), currentTime, courses[i].getID());
+                        //System.out.printf("%d\tStudent #%d dropped due to conflict at time %d course %d\n", ttttt, students[s].getName(), currentTime, courses[i].getID());
                     }
                 }
             } else {

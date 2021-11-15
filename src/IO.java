@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class IO {
     public static int getBusSchedule(String f) {
@@ -169,5 +170,6 @@ public class IO {
             e.printStackTrace();
         }
     }
+
     public static void main(String[] args) {}
 }

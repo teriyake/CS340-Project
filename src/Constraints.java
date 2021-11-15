@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 public class Constraints {
     
     private int timeSlots;
@@ -106,5 +108,35 @@ public class Constraints {
 
     public int getTotalProfs() {
         return this.profs.length;
+    }
+
+        /**
+     * generates hashmap with time slots enumerated so that we can see start & end times
+     * this accomodates extension of taking overlappung slots into account
+     * @param t1 number of timeslots that meet in the 1st rotation pattern (MW)
+     * @param t2 number of timeslots that meet in the 2nd rotation pattern (TTH)
+     * @param t3 number of timeslots that meet in the 3rd rotation pattern (MWF)
+     */
+    public HashMap<Integer, TimeSlot> getSlots(int t1, int t2, int t3){
+        HashMap<Integer, TimeSlot> times = new HashMap<Integer, TimeSlot>();
+        double start = 8;
+        // 1st rotation
+        for (int i = 1; i <= t1; i++) {
+            times.put(i, new TimeSlot(start, start+1.5, 1));
+            start += 1.5;
+        }
+        start = 8;
+        // 2nd rotation
+        for (int j = (t1 + 1); j <= (t1 + t2); j++) {
+            times.put(j, new TimeSlot(start, start+1.5, 2));
+            start += 1.5;
+        }
+        // 3rd rotation
+        start = 8;
+        for (int k = (t1 + t2 + 1); k <= (t1 + t2 + t3); k++) {
+            times.put(k, new TimeSlot(start, start+1, 3));
+            start += 1;
+        }
+        return times;
     }
 }
