@@ -121,7 +121,7 @@ public class Scheduling {
         Professor[] profAvailability = Arrays.copyOfRange(cons.getPCPairs(), 1, courses.length);
         Conflict[] conflicts = new Conflict[courses.length];
 
-        int spv = IO.populateCourses(studentPrefs, courses, labs, conflicts, students) * 4;
+        int spv = IO.populateCourses(studentPrefs, courses, labs, conflicts, students);
         double spvu = spv;
 
         Room[] npr = new Room[rooms.length];
